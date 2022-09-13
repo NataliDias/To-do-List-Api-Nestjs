@@ -6,7 +6,7 @@ import { TarefaService } from "../service/tarefa.service";
 
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Tarefa])],//Esta criando a tabela, passando a entidade da Classe Tarefa
+    imports: [TypeOrmModule.forFeature([Tarefa])],
     providers: [TarefaService],
     controllers: [TarefaController],
     exports: [TypeOrmModule]
