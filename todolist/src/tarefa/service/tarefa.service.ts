@@ -4,34 +4,34 @@ import { DeleteResult, ILike, Repository } from "typeorm";
 import { Tarefa } from "../entities/tarefa.entity";
 
 
-@Injectable()//Diz que a tarefa pode ser injetavel
+@Injectable()
 export class TarefaService{
 
     constructor(
-        @InjectRepository(Tarefa)//Vai injetar um repositorio pegando tarefa como entidade
-        private tarefaRepository: Repository<Tarefa>//Esta guardando esse repositório tarefa 
+        @InjectRepository(Tarefa)
+        private tarefaRepository: Repository<Tarefa> 
     ){}
 
-    async findAll(): Promise<Tarefa[]>{//Função Assincrona que retorna uma promisse que recupera um array/Lista[] de Tarefa
+    async findAll(): Promise<Tarefa[]>{
         return this.tarefaRepository.find({
-            relations: {//relaciona essa categoria com o atributo de tarefas
+            relations: {
                 categoria: true
             }
-        })//retorna o tarefa repository que o constructor pegou
+        })
     }
 
-    async findById(id: number): Promise<Tarefa>{//Retorna uma promisse unica
-        let tarefa = await this.tarefaRepository.findOne({//Encontra um  na tarefa repository
+    async findById(id: number): Promise<Tarefa>{
+        let tarefa = await this.tarefaRepository.findOne({
             where: {
-                id//onde o Id seja esse
+                id
             },
-            relations: {//relaciona essa categoria com o atributo de tarefas
+            relations: {
                 categoria: true
             }
         })
 
-        if (!tarefa)//Se tarefa for vazia
-            throw new HttpException('Tarefa não foi encontrada', HttpStatus.NOT_FOUND)//Retorna um erro do tipo notfound
+        if (!tarefa)
+            throw new HttpException('Tarefa não foi encontrada', HttpStatus.NOT_FOUND)
 
         return tarefa
         }
@@ -39,15 +39,15 @@ export class TarefaService{
     async findByNome(nome: string): Promise<Tarefa[]> {
         return this.tarefaRepository.find({
             where:{
-            nome: ILike(`%${nome}%`)//Retorna um nome. O iLike pesquisa independente da formatação ou apenas algumas letras
+            nome: ILike(`%${nome}%`)
             },
-            relations: {//relaciona essa categoria com o atributo de tarefas
+            relations: {
                 categoria: true
             }
         })
     }
 
-    async create(tarefa: Tarefa): Promise<Tarefa>{//Criando um objeto que recebe a clase tarefa
+    async create(tarefa: Tarefa): Promise<Tarefa>{
         return this.tarefaRepository.save(tarefa)
     }    
 
