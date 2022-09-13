@@ -5,11 +5,11 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  process.env.TZ = '-03:00'//tz = time zone e esta colocando três horas a menos, ficando igual ao horario de brasilia
+  process.env.TZ = '-03:00'
 
-  app.useGlobalPipes(new ValidationPipe())//Habilitou as validações em todas as aplicações
+  app.useGlobalPipes(new ValidationPipe())
 
-  app.enableCors()// Permite que outros dominios consumam a API
+  app.enableCors()
 
   await app.listen(3000);
 }
