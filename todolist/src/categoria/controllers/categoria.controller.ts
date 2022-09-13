@@ -6,20 +6,20 @@ import { CategoriaService } from "../services/categoria.service";
 export class CategoriaController{
     constructor(private readonly service: CategoriaService){}
 
-    @Get()//Mapeando o Get no controller
-    @HttpCode(HttpStatus.OK)//Retorna um status se der certo o Get ele retorna Ok
-    findAll(): Promise<Categoria[]>{
-        return this.service.findAll()//Busca tudo dentro do banco
-    }
-
-    @Get('/:id')//Passar o caminho de tarefa/id
+    @Get()
     @HttpCode(HttpStatus.OK)
-    findById(@Param('id', ParseIntPipe) id: number): Promise<Categoria>{//Esperando um Id, que vai ser do tipo inteiro
-        return this.service.findById(id)//Buscando um Id
+    findAll(): Promise<Categoria[]>{
+        return this.service.findAll()
     }
 
-    @Get('/descricao/:descricao')//tarefa/nome/l
-    @HttpCode(HttpStatus.OK)//Retorna um status se der certo o Get ele retorna Ok
+    @Get('/:id')
+    @HttpCode(HttpStatus.OK)
+    findById(@Param('id', ParseIntPipe) id: number): Promise<Categoria>{
+        return this.service.findById(id)
+    }
+
+    @Get('/descricao/:descricao')
+    @HttpCode(HttpStatus.OK)
     findByNome(@Param('descricao')nome: string): Promise<Categoria[]>{
         return this.service.findByDescricao(nome)
     } 
