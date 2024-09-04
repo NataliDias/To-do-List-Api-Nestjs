@@ -1,73 +1,83 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Passo a passo - criação e edição de APIs utilizando NestJs
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+*Criação e configuração*
 
-## Description
+1 - Criar um novo projeto Nest - nest new *nome-do-projeto*
+2 - Acessar a pasta do novo projeto e realizar a instalação do ORM, SQL e o Validator
+3 - npm install --save @nestjs/typeorm mysql2 - MySQL e ORM
+4 - npm install --save class-validator class-transformer - Validators
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+*Configurações Primárias no src/main.ts*
 
-## Installation
+5 - src/main.ts - Modificar o fuso-horário e Habilitar o validator
+6 - process.env.TZ = '-03:00' - Ajustar o fuso-horário ao do Brasil
+7 - app.useGlobalPipes(new ValidationPipe()) - Ativando as validações
+8 - app.enableCors()
 
-```bash
-$ npm install
-```
+*Criação do Schema/Database manual no SQL e inclusão no NestJs*
 
-## Running the app
+8 - Abrir MySQL Workbench - novo SQL File
+9 - Create database *nome-do-schema* - Criar ambiente para incluir as tabelas do projeto
+10 - use *nome-do-schema* - utilizar a schema criado no mysql
+11 - Configurar src/module.ts, remover controller e provider controllers: [], providers: [],
+12 - configurar imports: [ TypeOrmModule.forRoot ({ type: 'tipo do banco - mysql', host: 'endereço - localhost', port: padrao 3306 - verificar banco, username: 'root - verificar banco', password: 'senha do banco configurado do host', database: 'schema criado - db_projeto', entities: 'classe entity do projeto', synchronize: true/false}), ProjetoModule ],
+13 - Necessario criar src/nome-do-projeto, src/nome-do-projeto/entities, src/nome-do-projeto/modules para configurar o module principal
+14 - em entities criar projeto.entity.ts @Entity({name: 'nome da tabela'}) export class ProjetoNome { configurar colunas das tabelas, podendo ser numbers, strings ou Date, principais anotações: @PrimaryGeneratedColumn() - PK, @IsNotEmpty(), @MaxLength(100), @Column({nullable: false, length: 100})}
+15 - em modules criar projeto.module.ts @Module({imports:[TypeOrmModule.forFeature([Projeto])], providers:[ProjetoService], controllers:[ProjetoController], exports:[TypeOrmModule]}) export class ProjetoModule{}
+16 - Ao rodar o programa neste ponto com um npm run start:dev - a tabela definida no entity com name: já deve ter sido criada e pode ser acessada no workbench do mysql
 
-```bash
-# development
-$ npm run start
+*Criação do service e controller da API - configuração*
 
-# watch mode
-$ npm run start:dev
+17 - criar diretório src/projeto/controllers - mapeamento de requisições e src/projeto/service - construção das regras de negócio para as requisições
+18 - criar projeto.service.ts, utilizar anotação @Injectable() export class ProjetoService { construtor(@InjectableRepository(Projeto *Classe Entity*) private projetoRepository: Repository<Projeto>){} }
+19 - criar projeto.controller.ts, utilizar anotação @Controller('/projeto') export class ProjetoController {constructor(private readonly service: ProjetoService *Classe de serviço*){}}
+20 - iniciar a mapear post, put, delete, get no service e no controller
 
-# production mode
-$ npm run start:prod
-```
+*Criação das regras de negócios e funções assíncronas no service*
 
-## Test
+21 - async create(projeto: Projeto): Promise<Projeto>{return this.projetoRepository.save(projeto)}
+22 - async findAll(): Promise<Projeto[]>{return this.projetoRepository.find()}
+23 - async findById(id: numero): Promise<Projeto>{let projetoProcurado = await this.projetoRepository.findOne({where: {id}}) if(!projetoProcurado){throw new HttpException('Post nao encontrado!', HttpStatus.NOT_FOUND)} return projetoProcurado}
+24 - async findByNome(nome: string): Promise<Projeto[]>{return this.projetoRepository.find({where:{campoProcuradoDaTabela: ILike(`%${nome}%`)}})}
+25 - async delete(id: number): Promise<DeleteResult>{let projetoDeletar = await this.findById(id) if(!projetoDeletar){throw new HttpException('Nao encontrado!', HttpStatus.NOT_FOUND)} return this.projetoRepository.delete(id)}
+26 - async update(projeto: Projeto): Promise<Projeto>{let projetoAtualizar = await this.findById(projeto.id) if(!projetoAtualizar || !projeto.id){throw new HttpException('Projeto nao encontrado', HttpStatus.NOT_FOUND)} return this.projetoRepository.save(projeto)}
 
-```bash
-# unit tests
-$ npm run test
+*Mapeando requisições Http no controller*
 
-# e2e tests
-$ npm run test:e2e
+27 - Anotações @Get(), caso busca for especifica, adicionar endereço após '/projeto', @Get('/:id') - resultando em 'localhost:3000/projeto/id'
+28 - Anotações @Post() e @Put() não precisam de endereço adicional, será passado um @Body no parâmetro da função.
+29 - Anotação @Delete('/:parametro') é necessário um parametro que foi definido em service para utilizá-lo, id, ou nome.
+30 - Validação @HttpCode necessária, apenas Delete @HttpCode(HttpStatus.NO_CONTENT), demais requisições @HttpCode(HttpStatus.OK)
+31 - Funções que requerem um parâmetro de busca utilizam anotações @Param('nomeParametro') nomeParametro: string, ou, @Param('nomeParametro', ParseIntPipe) nomeParametro: number
+32 - Todas funções return this.service.funcaoDoService(parametro se tiver)
 
-# test coverage
-$ npm run test:cov
-```
+*Relacionamentos de tabelas 
 
-## Support
+33 - Criar uma nova pasta dentro de src/ com o nome da tabela que irá se relacionar, src/projeto se relaciona com src/projeto-rel
+34 - Criar pastas entities, modules, controllers, services para o projeto-rel
+35 - Criar projeto-rel.entity.ts com @Entity('nome_tabela_relacionada') sendo uma export class com nome ProjetoRelacao
+36 - Definir qual será a relação @OneToMany e qual será a @ManyToOne
+37 - Em @OneToMany - uma unica entrada pode se relacionar a muitas outras, @OneToMany(() => ClasseRelacionada, (objetoDaClasseRelacionada) => objetoDaClasseRelacionada.campoRelacionado) objetoDaClasseRelacionadaPlural: ClasseRelacionada[]
+38 - Em @ManyToOne(() => ClasseProjetoRelacionada, (objetoDaClasseRelacionada) => objetoDaClasseRelacionada.objetoDaClassePrinciapalPlural, {onDelete: "CASCADE"}) objetoDaClasseRelacionada: ClasseRelacionada
+39 - Utilizar relations em todos os services de classes relacionadas, relations: { campo_da_tabela_com_relação: true}
+40 - Relação OneToOne: @OneToOne(() => ClasseRelacionada) @JoinColumn() atributoNaTabela: ClasseRelacionada | Relação ManyToMany:  @ManyToMany(() => ClasseRelacionada, (atributoClasseRelacionada) => atributoClasseRelacionada.atributo) @JoinTable() atributoNaTabela: ClasseRelacionada[]
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+*Imports Fundamentais*
 
-## Stay in touch
+Controller
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import { DeleteResult} from "typeorm";
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Service
+import { HttpCode, HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DeleteResult, ILike, Repository } from "typeorm";
 
-## License
+Entity
+import { IsNotEmpty, Max, MaxLength } from "class-validator";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-Nest is [MIT licensed](LICENSE).
+Module
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
